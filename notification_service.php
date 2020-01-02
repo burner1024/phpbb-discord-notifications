@@ -310,33 +310,36 @@ class notification_service
 			}
 		}
 
-		// Place the message inside the JSON structure that Discord expects to receive at the REST endpoint.
-		$json = array("embeds"=>array(
-			"color"=>$color,
-			"description"=>$message
-			)
+		$embed = array(
+			"color"         => $color,
+			"description"   => $message,
 		);
-
-		if (isset($footer))
-		{
-			$json["embeds"]["footer"] = array("text"=>$footer);
+		if (isset($footer)) {
+			$embed["footer"] = array("text" => $footer);
 		}
 
+		$json_message = json_encode( array('embeds' => array($embed)), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+		if ( $json_message === false ) {
+			return false;
+		}
 		// Use the CURL library to transmit the message via a POST operation to the webhook URL.
-		$h = curl_init();
-		curl_setopt($h, CURLOPT_URL, $discord_webhook_url);
-		curl_setopt($h, CURLOPT_POST, 1);
-		curl_setopt($h, CURLOPT_POSTFIELDS, json_encode($json));
-		$response = curl_exec($h);
-		curl_close($h);
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-type: application/json', 'Content-Length: ' . strlen($json_message)));
+		curl_setopt( $ch, CURLOPT_URL,              $discord_webhook_url);
+		curl_setopt( $ch, CURLOPT_POST,             1);
+		curl_setopt( $ch, CURLOPT_POSTFIELDS,       $json_message);
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER,   1);
+
+		$response   = curl_exec($ch);
+		$returnCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+		curl_close($ch);
 
 		// Check if the response was not successful
-		if (is_array($response) && $response['message'])
+		if ($returnCode != 204 )
 		{
 			// TODO: If the response includes a message then an error has occurred. Determine whether we want to log it, queue it up to try again, etc.
 			return false;
 		}
-
 		return true;
 	}
 }
