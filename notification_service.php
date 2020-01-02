@@ -127,7 +127,7 @@ class notification_service
 			return null;
 		}
 
-		$sql = "SELECT post_subject from " . POSTS_TABLE . " WHERE post_id = " (int)$post_id;
+		$sql = "SELECT post_subject from " . POSTS_TABLE . " WHERE post_id = " . (int)$post_id;
 		$result = $this->db->sql_query($sql);
 		$data = $this->db->sql_fetchrow($result);
 		$subject = $data['post_subject'];
@@ -147,7 +147,7 @@ class notification_service
 			return null;
 		}
 
-		$sql = "SELECT topic_title from " . TOPICS_TABLE . " WHERE topic_id = " (int)$topic_id;
+		$sql = "SELECT topic_title from " . TOPICS_TABLE . " WHERE topic_id = " . (int)$topic_id;
 		$result = $this->db->sql_query($sql);
 		$data = $this->db->sql_fetchrow($result);
 		$title = $data['topic_title'];
